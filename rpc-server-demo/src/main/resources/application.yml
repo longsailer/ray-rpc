@@ -1,0 +1,11 @@
+server:
+  port: 8700
+spring:
+  application:
+    name: RPC-CLUSTER
+  profiles:
+    active: '@activatedProperties@'
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: true

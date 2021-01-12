@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.cesgroup</groupId>
+		<artifactId>zn-springboot-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.ray</groupId>
+	<artifactId>ray-rpc</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>ray-rpc</name>
+	<url>https://github.com/longsailer/ray-rpc/docs</url>
+
+	<developers>
+		<developer>
+			<name>Ray</name>
+			<url>git@github.com:longsailer/ray-rpc.git</url>
+			<email>longsail@hotmail.com</email>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<modules>
+		<module>rpc-server-spring-boot-starter</module>
+		<module>rpc-provider-spring-boot-starter</module>
+		<module>rpc-consumer-spring-boot-starter</module>
+		<module>rpc-core</module>
+		<module>rpc-consumer-demo</module>
+		<module>rpc-provider-demo</module>
+		<module>rpc-server-demo</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.fusesource.leveldbjni</groupId>
+				<artifactId>leveldbjni-all</artifactId>
+				<version>1.8</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>4.1.55.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ray</groupId>
+				<artifactId>rpc-core</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ray</groupId>
+				<artifactId>rpc-consumer-spring-boot-starter</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ray</groupId>
+				<artifactId>rpc-provider-spring-boot-starter</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ray</groupId>
+				<artifactId>rpc-server-spring-boot-starter</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<activatedProperties>dev</activatedProperties>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>test</id>
+			<properties>
+				<activatedProperties>test</activatedProperties>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<activatedProperties>prod</activatedProperties>
+			</properties>
+		</profile>
+	</profiles>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>zn-snapshots</id>
+			<name>ZN Snapshots</name>
+			<url>http://nexus.agrisaas.cn/repository/zn-snapshot/</url>
+		</snapshotRepository>
+		<repository>
+			<id>zn-releases</id>
+			<name>ZN Release</name>
+			<url>http://nexus.agrisaas.cn/repository/zn-release/</url>
+		</repository>
+	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests><!--默认关掉单元测试 -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-archetype-plugin</artifactId>
+				<version>3.2.0</version>
+			</plugin>
+		</plugins>
+	</build>
+</project>
