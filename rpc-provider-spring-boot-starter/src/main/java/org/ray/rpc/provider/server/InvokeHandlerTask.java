@@ -20,9 +20,8 @@ import io.netty.channel.ChannelHandlerContext;
  * @date: 2020年12月23日
  */
 public class InvokeHandlerTask extends BaseTask{
-	
 	private SpringApplicationContext context = SpringApplicationContext.getInstance();
-
+	
 	public InvokeHandlerTask(ChannelHandlerContext ctx, String msg)
 			throws JsonMappingException, JsonProcessingException {
 		super(ctx, msg);
@@ -64,10 +63,8 @@ public class InvokeHandlerTask extends BaseTask{
 			log.error("服务调用失败:", e);
 			try {
 				replyByError(error("服务调用失败"));
-			} catch (JsonProcessingException pe) {
+			} catch (Exception pe) {
 				log.error("返回结果失败:", pe);
-			} catch (InterruptedException e1) {
-				log.error("返回结果失败:", e1);
 			}
 		}finally{
 			close();

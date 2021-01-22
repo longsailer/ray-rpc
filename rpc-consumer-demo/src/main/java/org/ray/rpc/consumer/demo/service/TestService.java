@@ -25,7 +25,7 @@ public class TestService {
 	private HelloWorldService helloWorldService;
 	private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-	@PostConstruct
+	/*@PostConstruct
 	public void test() {
 		for (int i = 0; i < 100; i++) {
 			final int index = i;
@@ -39,7 +39,7 @@ public class TestService {
 		}
 	}
 
-	/*@PostConstruct
+	@PostConstruct
 	public void test1() {
 		long begin = System.currentTimeMillis();
 		for (int i = 0; i < 100; i++) {
@@ -48,16 +48,21 @@ public class TestService {
 		}
 		long end = System.currentTimeMillis();
 		System.out.println("list Total:"+(end-begin));
-	}
-
+	}*/
 	@PostConstruct
 	public void test2() {
-		long begin = System.currentTimeMillis();
-		for (int i = 0; i < 300; i++) {
-			User result = helloWorldService.getUser("张三", true, 30);
-			System.out.println("3.[" + i + "]" + result.getName());
+		for (int i = 0; i < 1000; i++) {
+			final int index = i;
+			executorService.execute(() -> {
+				try{
+					long begin = System.currentTimeMillis();
+					User user = helloWorldService.getUser("张三", true, index);
+					long end = System.currentTimeMillis();
+					System.out.println("3.[" + index + "]: " + user.getName() + "," + user.getAge() + " getUser Total:"+(end-begin));
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			});
 		}
-		long end = System.currentTimeMillis();
-		System.out.println("getUser Total:"+(end-begin));
-	}*/
+	}
 }

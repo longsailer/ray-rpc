@@ -3,8 +3,8 @@ package org.ray.rpc.core.client;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import org.ray.rpc.core.tcp.RpcRequest;
-import org.ray.rpc.core.tcp.RpcResponse;
+import org.ray.rpc.core.protocal.RpcRequest;
+import org.ray.rpc.core.protocal.RpcResponse;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 

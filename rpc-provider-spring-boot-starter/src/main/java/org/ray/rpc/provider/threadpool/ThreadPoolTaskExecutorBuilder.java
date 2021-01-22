@@ -15,32 +15,33 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class ThreadPoolTaskExecutorBuilder {
 	private ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 	private static ThreadPoolTaskExecutorBuilder ttBuilder = new ThreadPoolTaskExecutorBuilder();
-
 	private int corePoolSize = 30;
 	private int maxPoolSize = 50;
 	private int queueCapacity = Integer.MAX_VALUE;
 	private int keepAliveSeconds = 60;
-	private boolean initialize = false;
+	private volatile boolean initialize = false;
 
 	public static ThreadPoolTaskExecutorBuilder build() {
 		return ttBuilder;
 	}
 
-	public ThreadPoolTaskExecutor defaultPool() {
+	public synchronized ThreadPoolTaskExecutor defaultPool() {
+		if (initialize && "defaultThreadPool_".equals(executor.getThreadNamePrefix())) {
+			return executor;
+		}
 		return this.definedPool(corePoolSize, maxPoolSize, queueCapacity, keepAliveSeconds, "defaultThreadPool_");
 	}
 
-	public ThreadPoolTaskExecutor definedPool(int corePoolSize, int maxPoolSize, int queueCapacity, int keepAliveSeconds, String threadNamePrefix) {
-		if(!initialize && !"defaultThreadPool_".equals(executor.getThreadNamePrefix())){
-			initialize = true;
-			executor.setCorePoolSize(corePoolSize);
-			executor.setMaxPoolSize(maxPoolSize);
-			executor.setQueueCapacity(queueCapacity);
-			executor.setThreadNamePrefix(threadNamePrefix);
-			executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-			executor.setKeepAliveSeconds(keepAliveSeconds);
-			executor.initialize();
-		}
+	public ThreadPoolTaskExecutor definedPool(int corePoolSize, int maxPoolSize, int queueCapacity,
+			int keepAliveSeconds, String threadNamePrefix) {
+		initialize = true;
+		executor.setCorePoolSize(corePoolSize);
+		executor.setMaxPoolSize(maxPoolSize);
+		executor.setQueueCapacity(queueCapacity);
+		executor.setThreadNamePrefix(threadNamePrefix);
+		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+		executor.setKeepAliveSeconds(keepAliveSeconds);
+		executor.initialize();
 		return executor;
 	}
 }

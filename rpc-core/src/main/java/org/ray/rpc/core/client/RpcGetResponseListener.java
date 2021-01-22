@@ -25,7 +25,7 @@ public class RpcGetResponseListener implements RpcResponseListener {
 
 	public void onGetResponse() {
 		synchronized (lock) {
-			lock.notify();
+			lock.notifyAll();
 		}
 	}
 

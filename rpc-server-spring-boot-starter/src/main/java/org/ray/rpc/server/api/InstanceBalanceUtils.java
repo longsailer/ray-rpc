@@ -3,7 +3,7 @@ package org.ray.rpc.server.api;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.ray.rpc.core.client.ProviderInstance;
+import org.ray.rpc.core.bean.ProviderInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.Assert;
 
@@ -31,6 +31,11 @@ public class InstanceBalanceUtils {
 		pi.setHost(instance.getHost());
 		pi.setPort(instance.getPort());
 		return pi;
+	}
+	
+	
+	public static <S,T> List<T> beanToAnotherBean(List<S> sl, SwapeMapper<S,T> mapper){
+		return mapper.swape(sl);
 	}
 }
 

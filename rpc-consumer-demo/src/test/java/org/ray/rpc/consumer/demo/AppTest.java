@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import org.ray.rpc.core.JsonUtils;
 import org.ray.rpc.core.RpcTypeReference;
 import org.ray.rpc.core.bean.RpcResponseBean;
-import org.ray.rpc.core.tcp.RpcResponse;
+import org.ray.rpc.core.protocal.RpcResponse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;

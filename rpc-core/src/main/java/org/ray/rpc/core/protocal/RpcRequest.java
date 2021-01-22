@@ -1,4 +1,4 @@
-package org.ray.rpc.core.tcp;
+package org.ray.rpc.core.protocal;
 
 import java.io.Serializable;
 

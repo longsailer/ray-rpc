@@ -19,7 +19,7 @@ public class RpcClusterAutoConfigurature extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-		.antMatchers("/cluster").permitAll()
+		.antMatchers("/cluster/**").permitAll()
 		.and().csrf().disable();
 		super.configure(http);
 	}

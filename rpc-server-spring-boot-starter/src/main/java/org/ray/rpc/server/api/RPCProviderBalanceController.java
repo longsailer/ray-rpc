@@ -1,8 +1,10 @@
 package org.ray.rpc.server.api;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.ray.rpc.core.client.ProviderInstance;
+import org.ray.rpc.core.bean.ProviderInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,31 @@ public class RPCProviderBalanceController {
 			log.debug("【{}】当前没有可用服务", appName);
 		}
 		return pi;
+	}
+	
+	@ResponseBody
+	@RequestMapping(path="/all", method=RequestMethod.GET)
+	public Map<String, List<ProviderInstance>> findAll(){
+		log.debug("检查集群服务清单......");
+		Map<String, List<ProviderInstance>> allService = new HashMap<String, List<ProviderInstance>>();
+		List<String> serviceList = discoveryClient.getServices();
+		if(serviceList != null && serviceList.size() > 0){
+			for(String serviceId : serviceList){
+				List<ServiceInstance> insList = discoveryClient.getInstances(serviceId);
+				List<ProviderInstance> piList = new SwapeMapper<ServiceInstance, ProviderInstance>() {
+					public ProviderInstance mapper(ServiceInstance s) {
+						ProviderInstance pi = new ProviderInstance();
+						pi.setServiceId(s.getServiceId());
+						pi.setHost(s.getHost());
+						pi.setPort(s.getPort());
+						log.debug("服务{}的实例：{}:{}", s.getServiceId(), pi.getHost(), pi.getPort());
+						return pi;
+					}
+				}.swape(insList);
+				allService.put(serviceId, piList);
+			}
+		}
+		return allService;
 	}
 }
 

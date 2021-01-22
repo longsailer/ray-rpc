@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -62,7 +61,7 @@ public class MessageAnalysisHandler extends ChannelInboundHandlerAdapter {
 			RpcResponseBean<String> response = RPCResponseFactory.error("调用协议数据格式不正确");
 			resJson = JsonUtils.clazzToJson(response);
 			ByteBuf result = Unpooled.copiedBuffer(resJson, CharsetUtil.UTF_8);
-			ctx.writeAndFlush(result).addListener(ChannelFutureListener.CLOSE);
+			ctx.writeAndFlush(result);
 			result.release();
 		} catch (JsonProcessingException e) {
 			log.error("响应调用方时失败", e);

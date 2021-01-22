@@ -7,10 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.ray.rpc.core.bean.RpcResponseBean;
-import org.ray.rpc.core.netty.RpcClientReadHandler;
-import org.ray.rpc.core.netty.RpcIOChannelFactory;
-import org.ray.rpc.core.tcp.RpcRequest;
-import org.ray.rpc.core.tcp.RpcResponse;
+import org.ray.rpc.core.netty.NettyClient;
+import org.ray.rpc.core.netty.NettyConnectionPool;
+import org.ray.rpc.core.protocal.RpcRequest;
+import org.ray.rpc.core.protocal.RpcResponse;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class TcpRpcClient implements RpcClient {
 	private String clusterHost;
 	private int clusterPort;
-	private RpcIOChannelFactory factory = RpcIOChannelFactory.getInstance();
+	private NettyConnectionPool factory = NettyConnectionPool.getInstance();
 	private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 	public TcpRpcClient(String clusterHost, int clusterPort) {
@@ -36,8 +36,8 @@ public class TcpRpcClient implements RpcClient {
 	public <T> RpcResponse<T> call(RpcRequest request, TypeReference<T> returnType)
 			throws IllegalStateException, InterruptedException, ExecutionException, IOException {
 		RpcClientTasker<T> tasker = new RpcClientTasker<T>(request, returnType);
-		RpcClientReadHandler<T> readHandler = tasker.ready().getRpcClientReadHandler();
-		factory.of(clusterHost, clusterPort, request.getApplicationName(), readHandler).connect();
+		NettyClient client = factory.create(clusterHost, clusterPort, request.getApplicationName());
+		client.writeAndFlush(request);
 		Future<RpcResponseBean<T>> callResult = executorService.submit(tasker);
 		RpcResponseBean<T> response = callResult.get();
 		return response;
@@ -46,7 +46,7 @@ public class TcpRpcClient implements RpcClient {
 	public <T> T callForObject(RpcRequest request, TypeReference<T> returnType)
 			throws IllegalStateException, InterruptedException, ExecutionException, IOException {
 		RpcResponse<T> response = this.call(request, returnType);
-		if(response.getStatus() != 200){
+		if (response.getStatus() != 200) {
 			throw new ExecutionException(new Exception(response.getMsg()));
 		}
 		return response.getData();

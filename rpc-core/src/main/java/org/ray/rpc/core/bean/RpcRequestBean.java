@@ -1,6 +1,6 @@
 package org.ray.rpc.core.bean;
 
-import org.ray.rpc.core.tcp.RpcRequest;
+import org.ray.rpc.core.protocal.RpcRequest;
 
 /**
  * RPCRequest.java

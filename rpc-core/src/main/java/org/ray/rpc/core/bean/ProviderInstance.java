@@ -1,4 +1,4 @@
-package org.ray.rpc.core.client;
+package org.ray.rpc.core.bean;
 
 import java.io.Serializable;
 

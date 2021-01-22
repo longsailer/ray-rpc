@@ -2,6 +2,7 @@ package org.ray.rpc.consumer;
 
 import org.ray.rpc.core.client.RpcClient;
 import org.ray.rpc.core.client.TcpRpcClient;
+import org.ray.rpc.core.ins.SyncServiceInstanceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
@@ -33,7 +34,22 @@ public class ConsumerAutoConfiguration implements EnvironmentAware{
 	}
 	
 	@Bean
+	@ConditionalOnClass(SyncServiceInstanceProcessor.class)
+	public SyncServiceInstanceProcessor serviceInstanceProcessor(){
+		String[] clusterInfo = this.clusterInfo();
+		int port = Integer.parseInt(clusterInfo[1]);
+		return new SyncServiceInstanceProcessor(clusterInfo[0], port);
+	}
+	
+	@Bean
 	public RpcClient rpcClient(){
+		String[] clusterInfo = this.clusterInfo();
+		int port = Integer.parseInt(clusterInfo[1]);
+		RpcClient client = new TcpRpcClient(clusterInfo[0], port);
+		return client;
+	}
+	
+	private String[] clusterInfo(){
 		String eurekaDefaultZone = environment.getProperty("eureka.client.serviceUrl.defaultZone");
 		Assert.hasText(eurekaDefaultZone, "The value of property eureka.client.serviceUrl.defaultZone is required.");
 		int begin = eurekaDefaultZone.indexOf("@");
@@ -42,9 +58,7 @@ public class ConsumerAutoConfiguration implements EnvironmentAware{
 		}
 		int end = eurekaDefaultZone.indexOf("/", begin+3);
 		String[] clusterInfo = eurekaDefaultZone.substring(begin+1, end).split(":");
-		int port = Integer.parseInt(clusterInfo[1]);
-		RpcClient client = new TcpRpcClient(clusterInfo[0], port);
-		return client;
+		return clusterInfo;
 	}
 
 	@Override
