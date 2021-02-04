@@ -1,10 +1,10 @@
-package org.ray.rpc.provider.server;
+package org.ray.rpc.provider.task;
 
 import java.lang.reflect.Method;
 
 import org.ray.rpc.core.JsonUtils;
+import org.ray.rpc.core.bean.RpcRequestBean;
 import org.ray.rpc.provider.context.SpringApplicationContext;
-import org.ray.rpc.provider.threadpool.BaseTask;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,9 +22,9 @@ import io.netty.channel.ChannelHandlerContext;
 public class InvokeHandlerTask extends BaseTask{
 	private SpringApplicationContext context = SpringApplicationContext.getInstance();
 	
-	public InvokeHandlerTask(ChannelHandlerContext ctx, String msg)
+	public InvokeHandlerTask(ChannelHandlerContext ctx, RpcRequestBean request)
 			throws JsonMappingException, JsonProcessingException {
-		super(ctx, msg);
+		super(ctx, request);
 	}
 
 	public void run() {
@@ -67,7 +67,6 @@ public class InvokeHandlerTask extends BaseTask{
 				log.error("返回结果失败:", pe);
 			}
 		}finally{
-			close();
 		}
 	}
 }

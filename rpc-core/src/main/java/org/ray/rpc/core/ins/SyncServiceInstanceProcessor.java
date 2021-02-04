@@ -29,12 +29,14 @@ public class SyncServiceInstanceProcessor implements InitializingBean{
 	private static Logger log = LoggerFactory.getLogger(SyncServiceInstanceProcessor.class);
 	private String clusterHost;
 	private int clusterPort;
+	private long registryFetchDelay = 60;
 
 	private ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(2);
 	
-	public SyncServiceInstanceProcessor(String clusterHost, int clusterPort){
+	public SyncServiceInstanceProcessor(String clusterHost, int clusterPort, long registryFetchDelay){
 		this.clusterHost = clusterHost;
 		this.clusterPort = clusterPort;
+		this.registryFetchDelay = registryFetchDelay;
 	}
 	
 	public void afterPropertiesSet() throws Exception {
@@ -52,7 +54,7 @@ public class SyncServiceInstanceProcessor implements InitializingBean{
 			}
 		};
 		syncTasker.run();
-		threadPool.scheduleWithFixedDelay(syncTasker, 3, 5, TimeUnit.SECONDS);
+		threadPool.scheduleWithFixedDelay(syncTasker, 30, registryFetchDelay, TimeUnit.SECONDS);
 	}
 	
 	private Map<String, List<ProviderInstance>> findAllProviderInstance() throws IOException {

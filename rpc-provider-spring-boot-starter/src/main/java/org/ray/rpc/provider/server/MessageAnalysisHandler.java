@@ -2,8 +2,10 @@ package org.ray.rpc.provider.server;
 
 import org.ray.rpc.core.JsonUtils;
 import org.ray.rpc.core.RPCResponseFactory;
+import org.ray.rpc.core.bean.RpcRequestBean;
 import org.ray.rpc.core.bean.RpcResponseBean;
-import org.ray.rpc.provider.threadpool.ThreadPoolTaskExecutorBuilder;
+import org.ray.rpc.core.thread.ThreadPoolTaskExecutorBuilder;
+import org.ray.rpc.provider.task.InvokeHandlerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.json.JsonParseException;
@@ -27,35 +29,48 @@ import io.netty.util.CharsetUtil;
  * @author: ray
  * @date: 2020年12月9日
  */
-@Sharable                                        //1
+@Sharable
 public class MessageAnalysisHandler extends ChannelInboundHandlerAdapter {
 	private Logger log = LoggerFactory.getLogger(MessageAnalysisHandler.class);
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+	}
+
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		ctx.close();
+	}
 	
 	@Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ByteBuf in = (ByteBuf) msg;
-        String message = in.toString(CharsetUtil.UTF_8);
-        log.debug("Received [{}]: {}", ctx.channel().id().asShortText(), message);        //2
         try {
-			ThreadPoolTaskExecutorBuilder.build().defaultPool().execute(new InvokeHandlerTask(ctx, message));
+        	RpcRequestBean request = null;
+        	if(msg instanceof RpcRequestBean){
+        		request = (RpcRequestBean) msg;
+        	}else{
+        		throw new IllegalArgumentException("消息类型不匹配应该是 RpcRequestBean");
+        	}
+			ThreadPoolTaskExecutorBuilder.build().defaultPool().execute(new InvokeHandlerTask(ctx, request));
 		} catch (JsonMappingException e) {
 			log.error("调用协议数据格式不正确", e);
 			replyByError(ctx);
 		} catch (JsonProcessingException e) {
 			log.error("调用协议数据格式不正确", e);
 			replyByError(ctx);
+		} catch (IllegalArgumentException e) {
+			log.error("调用协议数据格式不正确", e);
+			replyByError(ctx);
 		} finally {
-			in.release();
 		}
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();                //5
-        ctx.close();                            //6
+        log.error("连接["+ctx.channel().id().asShortText()+"]发生错误,原因请参考：", cause);
+        ctx.close();
     }
     
-    public void replyByError(ChannelHandlerContext ctx){
+    private void replyByError(ChannelHandlerContext ctx){
     	String resJson;
 		try {
 			RpcResponseBean<String> response = RPCResponseFactory.error("调用协议数据格式不正确");

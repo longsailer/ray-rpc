@@ -18,7 +18,7 @@ import org.springframework.util.Assert;
 @Configuration
 @AutoConfigureOrder
 @ComponentScan("org.ray.rpc.consumer")
-@ConditionalOnClass({AutoConfiguredConsumerScannerRegistrar.class})
+@ConditionalOnClass({AutoConfiguredConsumerScannerRegistrar.class, SyncServiceInstanceProcessor.class})
 @EnableConfigurationProperties(ConsumerProperties.class)
 public class ConsumerAutoConfiguration implements EnvironmentAware{
 	private static Logger log = LoggerFactory.getLogger(ConsumerAutoConfiguration.class);
@@ -29,24 +29,25 @@ public class ConsumerAutoConfiguration implements EnvironmentAware{
 		log.debug("Scan consumer and registried in spring container...");
 		String basePackage = environment.getProperty("rpc.consumer.consumerLocation");
 		Assert.hasText(basePackage, "The value of property rpc.consumer.consumerLocation is required.");
+		try {
+			serviceInstanceProcessor().afterPropertiesSet();
+		} catch (Exception e) {
+			log.error("Sync registory service error", e);
+		}
 		RpcClient client = rpcClient();
 		return new AutoConfiguredConsumerScannerRegistrar(basePackage, client);
 	}
 	
-	@Bean
-	@ConditionalOnClass(SyncServiceInstanceProcessor.class)
-	public SyncServiceInstanceProcessor serviceInstanceProcessor(){
+	private SyncServiceInstanceProcessor serviceInstanceProcessor(){
 		String[] clusterInfo = this.clusterInfo();
 		int port = Integer.parseInt(clusterInfo[1]);
-		return new SyncServiceInstanceProcessor(clusterInfo[0], port);
+		long delay = environment.getProperty("rpc.registry-fetch-delay", Long.class, 10L);
+		return new SyncServiceInstanceProcessor(clusterInfo[0], port, delay);
 	}
 	
 	@Bean
 	public RpcClient rpcClient(){
-		String[] clusterInfo = this.clusterInfo();
-		int port = Integer.parseInt(clusterInfo[1]);
-		RpcClient client = new TcpRpcClient(clusterInfo[0], port);
-		return client;
+		return new TcpRpcClient();
 	}
 	
 	private String[] clusterInfo(){

@@ -9,8 +9,8 @@ package org.ray.rpc.core.netty;
  */
 public class RpcClientReadHandlerFactory {
 
-	public static <T> RpcClientReadHandler<T> createReadHandler(){
-		return new RpcClientReadHandler<T>();
+	public static RpcClientReadHandler createReadHandler(){
+		return new RpcClientReadHandler();
 	}
 }
 

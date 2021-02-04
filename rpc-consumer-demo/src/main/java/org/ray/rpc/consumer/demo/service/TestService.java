@@ -1,13 +1,17 @@
 package org.ray.rpc.consumer.demo.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
 import org.ray.rpc.consumer.demo.bean.User;
 import org.ray.rpc.consumer.demo.client.HelloWorldService;
+import org.ray.rpc.core.thread.ThreadPoolTaskExecutorBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +27,6 @@ import org.springframework.stereotype.Component;
 public class TestService {
 	@Autowired
 	private HelloWorldService helloWorldService;
-	private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
 	/*@PostConstruct
 	public void test() {
 		for (int i = 0; i < 100; i++) {
@@ -51,18 +53,37 @@ public class TestService {
 	}*/
 	@PostConstruct
 	public void test2() {
+		List<Future<User>> fList = new ArrayList<Future<User>>();
 		for (int i = 0; i < 1000; i++) {
 			final int index = i;
-			executorService.execute(() -> {
+			Future<User> future = ThreadPoolTaskExecutorBuilder.build().definedPool(5, 5, 5, 60, "testthread_").submit(() -> {
 				try{
-					long begin = System.currentTimeMillis();
 					User user = helloWorldService.getUser("张三", true, index);
-					long end = System.currentTimeMillis();
-					System.out.println("3.[" + index + "]: " + user.getName() + "," + user.getAge() + " getUser Total:"+(end-begin));
+					return user;
 				}catch(Exception e){
 					e.printStackTrace();
+					return null;
 				}
 			});
+			fList.add(future);
 		}
+		
+		for(Future<User> future : fList){
+			try {
+				User user  = future.get();
+				System.out.println("User: " + user.getName() + "," + user.getAge());
+				this.count();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private int count=0;
+	public synchronized void count(){
+		count++;
+		System.out.println(count);
 	}
 }

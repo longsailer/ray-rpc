@@ -2,6 +2,8 @@ package org.ray.rpc.provider.server;
 
 import java.net.InetSocketAddress;
 
+import org.ray.rpc.core.protocal.RpcRequestDecoder;
+import org.ray.rpc.core.protocal.RpcResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,10 @@ public class ProviderServer extends Thread {
 					.childHandler(new ChannelInitializer<SocketChannel>() { // 7
 						@Override
 						public void initChannel(SocketChannel ch) throws Exception {
-							ch.pipeline().addLast(new MessageAnalysisHandler());
+							ch.pipeline()
+								.addLast(new RpcRequestDecoder())
+								.addLast(new RpcResponseEncoder())
+								.addLast(new MessageAnalysisHandler());
 						}
 					});
 			ChannelFuture f = b.bind().sync(); // 8

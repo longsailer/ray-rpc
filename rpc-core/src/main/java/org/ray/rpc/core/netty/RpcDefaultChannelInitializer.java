@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.ray.rpc.core.protocal.RpcRequestEncoder;
+import org.ray.rpc.core.protocal.RpcResponseDecoder;
+
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInitializer;
@@ -28,7 +31,8 @@ public class RpcDefaultChannelInitializer extends ChannelInitializer<SocketChann
 	}
 	
 	private void initChannelPipeline(){
-		ch.pipeline().addLast(new RpcClientWriteHandler());
+		ch.pipeline().addLast(new RpcRequestEncoder())
+					 .addLast(new RpcResponseDecoder());
 		if(!channelHandlers.isEmpty()){
 			Iterator<ChannelHandler> its = channelHandlers.iterator();
 			while(its.hasNext()){

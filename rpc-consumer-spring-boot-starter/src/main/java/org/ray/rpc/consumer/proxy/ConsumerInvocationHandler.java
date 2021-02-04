@@ -44,12 +44,10 @@ public class ConsumerInvocationHandler implements InvocationHandler {
 			request.setMethodName(methodName);
 			request.setParamValues(args);
 			request.setRequestId(UUID.randomUUID().toString());
-			log.debug("Send request id is:{}", request.getRequestId());
 			response = client.call(request, new RpcTypeReference<RpcResponseBean<Object>>(method.getGenericReturnType()));
 			if(response == null){
 				throw new NullPointerException("Response is null.");
 			}
-			log.debug("Received request id is:{}", response.getRequestId());
 			if(response.getStatus() != 200){
 				throw new ServerException(response.getMsg());
 			}
